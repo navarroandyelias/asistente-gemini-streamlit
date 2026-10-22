@@ -74,7 +74,7 @@ Reglas estrictas de la simulación:
 5. Al finalizar la tercera respuesta del usuario, genera un reporte de desempeño detallado en formato Markdown que incluya fortalezas, áreas de mejora y una calificación final.
 """
 
-# Inicializar historial de mensajes y saludo estático (CERO llamadas a la API al arrancar para evitar bloqueos)
+# Inicializar historial de mensajes y saludo estático
 if "messages" not in st.session_state or st.session_state.get("last_role") != role or st.session_state.get("last_exp") != experience:
     st.session_state.last_role = role
     st.session_state.last_exp = experience
@@ -96,13 +96,12 @@ if user_input := st.chat_input("Escribe tu respuesta aquí..."):
     with st.chat_message("user"):
         st.markdown(user_input)
 
-    # Generación de respuesta con manejo de reintentos y modelo estable
+    # Generación de respuesta usando el modelo actualizado gemini-3.8-flash
     with st.chat_message("assistant"):
         with st.spinner("Analizando respuesta..."):
             try:
                 client = genai.Client(api_key=api_key)
                 
-                # Construir el historial para enviarlo de forma limpia
                 contents = []
                 for msg in st.session_state.messages:
                     gemini_role = "user" if msg["role"] == "user" else "model"
@@ -114,7 +113,7 @@ if user_input := st.chat_input("Escribe tu respuesta aquí..."):
                     )
                 
                 response = client.models.generate_content(
-                    model="gemini-2.5-flash",
+                    model="gemini-3.8-flash",
                     contents=contents,
                     config=types.GenerateContentConfig(
                         system_instruction=system_instruction,
